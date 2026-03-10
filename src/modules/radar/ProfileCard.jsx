@@ -59,10 +59,21 @@ export default function ProfileCard({ partnerId }) {
   }, []);
 
   const handleSave = useCallback(async () => {
+    // Map form keys to the snake_case field names expected by partnersService
+    const keyMap = {
+      name: 'contact_name',
+      company: 'company_name',
+      email: 'contact_email',
+      phone: 'contact_phone',
+      region: 'region',
+      tier: 'tier',
+      notes: 'notes',
+    };
     const updates = {};
     Object.entries(form).forEach(([key, value]) => {
       if (value && value.trim()) {
-        updates[key] = value.trim();
+        const serviceKey = keyMap[key] || key;
+        updates[serviceKey] = value.trim();
       }
     });
     if (Object.keys(updates).length > 0) {

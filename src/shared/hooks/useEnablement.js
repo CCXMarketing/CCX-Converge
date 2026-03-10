@@ -466,10 +466,9 @@ export function useEnablement() {
     // Checklist actions
     createChecklist: checklistActions.create,
     updateChecklist: checklistActions.update,
-    deleteChecklist: checklistActions.delete,
-    
+    deleteChecklist: checklistActions.remove,
+
     // Tier criteria actions
-    createTierCriteria: tierActions.create,
     updateTierCriteria: tierActions.update,
     
     // Asset link actions

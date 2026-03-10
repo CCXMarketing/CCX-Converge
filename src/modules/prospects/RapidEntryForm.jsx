@@ -176,28 +176,27 @@ export default function RapidEntryForm({ onClose, onSubmit }) {
               />
             )}
           </div>
-        </form>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="rounded-lg border border-[#02475A] px-5 py-2.5 text-sm font-semibold text-[#02475A] transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ADC837] focus:ring-offset-2 disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#ADC837] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#9AB52F] active:bg-[#8AA228] focus:outline-none focus:ring-[3px] focus:ring-[rgba(173,200,55,0.2)] disabled:opacity-50"
-          >
-            <Plus className="h-4 w-4" />
-            {isSubmitting ? 'Adding...' : 'Add Prospect'}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-200 px-6 py-4">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="rounded-lg border border-[#02475A] px-5 py-2.5 text-sm font-semibold text-[#02475A] transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#ADC837] focus:ring-offset-2 disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="inline-flex items-center gap-2 rounded-lg bg-[#ADC837] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#9AB52F] active:bg-[#8AA228] focus:outline-none focus:ring-[3px] focus:ring-[rgba(173,200,55,0.2)] disabled:opacity-50"
+            >
+              <Plus className="h-4 w-4" />
+              {isSubmitting ? 'Adding...' : 'Add Prospect'}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

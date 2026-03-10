@@ -49,7 +49,7 @@ export default function DealTracker({ partnerId }) {
   const handleCheckConflict = useCallback(async () => {
     if (!regForm.productName.trim()) return;
     const result = await checkConflict(partnerId, regForm.productName.trim());
-    if (result?.success && result.data?.hasConflict) {
+    if (result?.success && result.data?.has_conflict) {
       setConflictWarning(result.data.message || 'A deal with this product already exists for this partner.');
     } else {
       setConflictWarning(null);
@@ -65,9 +65,9 @@ export default function DealTracker({ partnerId }) {
     }
 
     const dealData = {
-      partnerId,
-      productName: regForm.productName.trim(),
-      notes: regForm.notes.trim() || undefined,
+      partner_id: partnerId,
+      deal_name: regForm.productName.trim(),
+      description: regForm.notes.trim() || undefined,
     };
 
     if (regForm.value.trim()) {
@@ -279,7 +279,7 @@ export default function DealTracker({ partnerId }) {
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <h4 className="text-sm font-semibold text-gray-900">
-                    {deal.productName || 'Untitled Deal'}
+                    {deal.deal_name || 'Untitled Deal'}
                   </h4>
                   {deal.value != null && (
                     <span className="text-sm font-medium text-gray-600">

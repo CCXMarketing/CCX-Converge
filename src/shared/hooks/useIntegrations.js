@@ -313,7 +313,7 @@ export function useActivityLog(filters = {}) {
       const result = await getActivityLog(filters);
 
       if (result.success) {
-        setLogs(result.data || []);
+        setLogs(result.data?.entries || []);
       } else {
         setError(result.error);
         setLogs([]);
@@ -343,7 +343,7 @@ export function useActivityLog(filters = {}) {
         if (cancelled) return;
 
         if (result.success) {
-          setLogs(result.data || []);
+          setLogs(result.data?.entries || []);
         } else {
           setError(result.error);
           setLogs([]);

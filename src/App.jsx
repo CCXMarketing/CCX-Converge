@@ -33,7 +33,7 @@ function App() {
             <Route path="radar" element={<RadarLayout />} />
             <Route path="prospects" element={<ProspectListLayout />} />
             <Route path="scout" element={<ScoutLayout />} />
-            <Route path="/stan" element={<StanLayout />} />
+            <Route path="stan" element={<StanLayout />} />
             <Route path="integrations" element={<IntegrationsLayout />} />
             <Route path="reporting" element={<ReportingLayout />} />
             <Route path="enablement" element={<EnablementLayout />} />
