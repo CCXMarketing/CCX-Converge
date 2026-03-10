@@ -1,0 +1,1863 @@
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<style>
+    /* --- CORE VARIABLES --- */
+    #ccx-app-root {
+        --brand-color: #024659;
+        --brand-color-dark: #003340;
+        --gold: #f1c40f;
+        --orange: #f57f17;
+        --ltc-color: #673ab7;
+        --ltc-bg: #ede7f6;
+        --amb-color: #e91e63;
+        --amb-bg: #fce4ec;
+        --text-color: #1a2e3b;
+        --text-color-light: #5a6e7a;
+        --light-gray: #f0f2f5;
+        --inactive-tab-bg: #ededed;
+        --border-color: #cfd8dc;
+        --white: #ffffff;
+        --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+        /* Typography Update */
+        font-family: 'Nunito Sans', sans-serif !important;
+        color: var(--text-color);
+        background-color: var(--white);
+        border: 2px solid var(--brand-color);
+        border-radius: 6px;
+        overflow: hidden;
+        box-shadow: var(--shadow-soft);
+        line-height: 1.5;
+        margin-bottom: 40px;
+        position: relative;
+    }
+
+    /* --- Global Sentence Case Transformation --- */
+    #ccx-app-root h4,
+    #ccx-app-root .partner-card h4,
+    #ccx-app-root .referral-card h4,
+    #ccx-app-root .dash-opp-item strong,
+    #dr-name {
+        text-transform: capitalize !important;
+        font-variant: normal !important;
+    }
+
+    /* --- TABS --- */
+    .ccx-tabs {
+        display: flex;
+        background-color: var(--inactive-tab-bg);
+        border-bottom: 2px solid var(--brand-color);
+    }
+
+    #ccx-app-root .ccx-tab-btn {
+        padding: 16px 24px;
+        background-color: var(--inactive-tab-bg) !important;
+        color: var(--brand-color) !important;
+        border: none !important;
+        border-right: 1px solid #d1d1d1 !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 0;
+        font-size: 15px;
+        flex-grow: 1;
+        text-align: center;
+    }
+
+    #ccx-app-root .ccx-tab-btn:hover {
+        background-color: #e1e1e1 !important;
+        color: var(--brand-color-dark) !important;
+    }
+
+    #ccx-app-root .ccx-tab-btn.active {
+        background-color: var(--brand-color) !important;
+        color: white !important;
+        border-right: 1px solid var(--brand-color) !important;
+    }
+
+    /* --- SUB TABS --- */
+    .sub-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 0;
+        flex-wrap: wrap;
+    }
+
+    .sub-tab-btn {
+        background: transparent !important;
+        color: var(--text-color-light) !important;
+        border: none !important;
+        border-bottom: 3px solid transparent !important;
+        padding: 10px 15px !important;
+        border-radius: 0 !important;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        margin-bottom: 0 !important;
+    }
+
+    .sub-tab-btn:hover {
+        color: var(--brand-color) !important;
+    }
+
+    .sub-tab-btn.active {
+        color: var(--brand-color) !important;
+        border-bottom-color: var(--brand-color) !important;
+    }
+
+    /* --- LAYOUT --- */
+    .ccx-content {
+        padding: 24px;
+    }
+
+    .header-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .filter-bar {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 15px;
+        margin-bottom: 20px;
+        background: #f8f9fa;
+        padding: 10px 15px;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        align-items: center;
+    }
+
+    .grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .grid-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 20px;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    /* --- UI ELEMENTS --- */
+    #ccx-app-root h2 {
+        font-size: 24px;
+        margin-bottom: 4px;
+        font-weight: 800;
+        color: var(--text-color);
+        line-height: 1.2;
+    }
+
+    #ccx-app-root h3 {
+        font-size: 18px;
+        color: var(--brand-color);
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    #ccx-app-root h4 {
+        font-size: 15px;
+        font-weight: 800;
+        color: var(--text-color);
+        margin-top: 15px;
+        margin-bottom: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    #ccx-app-root small {
+        font-size: 13px;
+        color: var(--text-color-light);
+    }
+
+    #ccx-app-root label {
+        font-weight: 700;
+        margin-bottom: 6px;
+        font-size: 13px;
+        display: block;
+        color: var(--text-color);
+    }
+
+    #ccx-app-root input,
+    #ccx-app-root select,
+    #ccx-app-root textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 0;
+        border-radius: 6px;
+        border: 1px solid var(--border-color) !important;
+        background-color: var(--light-gray) !important;
+        color: var(--text-color) !important;
+        font-family: 'Nunito', sans-serif;
+        font-size: 14px;
+        height: auto;
+    }
+
+    #ccx-app-root input:focus,
+    #ccx-app-root select:focus,
+    #ccx-app-root textarea:focus {
+        outline: none;
+        border-color: var(--brand-color) !important;
+        background-color: #fff !important;
+    }
+
+    #ccx-app-root input[type="search"] {
+        padding-left: 38px !important;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='https://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%235a6e7a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: 12px center;
+    }
+
+    #ccx-app-root input[type="date"] {
+        cursor: pointer;
+        position: relative;
+    }
+
+    #ccx-app-root input[type="date"]::-webkit-calendar-picker-indicator {
+        background: transparent;
+        bottom: 0;
+        color: transparent;
+        cursor: pointer;
+        height: auto;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: auto;
+    }
+
+    /* --- BUTTONS --- */
+    #ccx-app-root button {
+        background-color: var(--brand-color);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        display: inline-block;
+        width: auto;
+        transition: transform 0.2s;
+        margin-bottom: 0;
+    }
+
+    #ccx-app-root button:hover {
+        background-color: var(--brand-color-dark);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    #ccx-app-root button.outline {
+        background-color: transparent;
+        color: var(--text-color-light);
+        border: 2px solid var(--border-color);
+    }
+
+    #ccx-app-root button.outline:hover {
+        border-color: var(--brand-color);
+        color: var(--brand-color);
+    }
+
+    #ccx-app-root button.secondary {
+        background-color: var(--light-gray);
+        color: var(--text-color);
+    }
+
+    #ccx-app-root button.danger {
+        background-color: #ffebee;
+        color: #c62828;
+        border: 1px solid #ffcdd2;
+    }
+
+    #ccx-app-root button.danger:hover {
+        background-color: #ef5350;
+        color: white;
+    }
+
+    #ccx-app-root button.warning {
+        background-color: #fff3e0;
+        color: #ef6c00;
+        border: 1px solid #ffe0b2;
+    }
+
+    #ccx-app-root button.warning:hover {
+        background-color: #ff9800;
+        color: white;
+    }
+
+    #ccx-app-root button.contrast {
+        background-color: #546e7a;
+        color: white;
+    }
+
+    #ccx-app-root button.icon-btn {
+        padding: 8px 12px;
+        font-size: 16px;
+    }
+
+    #ccx-app-root button.small-text-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+        margin-top: 0;
+        margin-bottom: 4px;
+        border: 1px solid var(--border-color);
+        background: #fff;
+        color: var(--brand-color);
+    }
+
+    /* --- CHAT STYLES --- */
+    .chat-window {
+        height: 500px;
+        overflow-y: auto;
+        padding: 20px;
+        background: #f8f9fa;
+        border: 1px solid #cfd8dc;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .message-bubble {
+        max-width: 75%;
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 13px !important;
+        /* Forces 13px for both user and AI bubbles */
+        line-height: 1.4;
+        position: relative;
+        word-wrap: break-word;
+    }
+
+    .msg-user {
+        align-self: flex-end;
+        background-color: var(--brand-color);
+        color: white;
+        border-bottom-right-radius: 2px;
+    }
+
+    .msg-ai {
+        align-self: flex-start;
+        background-color: white;
+        color: var(--text-color);
+        border: 1px solid #cfd8dc;
+        border-bottom-left-radius: 2px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Standardizing all inner AI content to 13px */
+    .msg-ai h1,
+    .msg-ai h2,
+    .msg-ai h3,
+    .msg-ai h4 {
+        font-size: 13px !important;
+        font-weight: 800 !important;
+        margin-top: 8px !important;
+        margin-bottom: 4px !important;
+        color: var(--brand-color);
+    }
+
+    .msg-ai p,
+    .msg-ai li,
+    .msg-ai span {
+        font-size: 13px !important;
+        margin-bottom: 6px !important;
+    }
+
+    .msg-ai ul,
+    .msg-ai ol {
+        padding-left: 18px !important;
+        margin-bottom: 6px !important;
+        margin-top: 0 !important;
+    }
+
+    .msg-ai li {
+        margin-bottom: 2px !important;
+    }
+
+    .chat-input-container {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .typing-indicator {
+        font-style: italic;
+        color: #999;
+        font-size: 11px;
+        margin-bottom: 10px;
+        display: none;
+    }
+
+    /* --- PIPELINE & OTHER --- */
+    #ccx-app-root .pipeline-steps {
+        display: flex !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        width: 100% !important;
+        gap: 4px !important;
+        margin-top: 20px !important;
+        margin-bottom: 30px !important;
+    }
+
+    #ccx-app-root .step {
+        flex-grow: 1 !important;
+        height: 6px !important;
+        background: #cfd8dc !important;
+        position: relative !important;
+        border-radius: 4px !important;
+        display: block !important;
+    }
+
+    #ccx-app-root .step-label {
+        position: absolute !important;
+        top: 14px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        font-size: 9px !important;
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        color: var(--text-color-light) !important;
+        width: auto !important;
+        white-space: nowrap !important;
+    }
+
+    #ccx-app-root .step.active {
+        background: var(--brand-color) !important;
+    }
+
+    #ccx-app-root .step.active .step-label {
+        color: var(--brand-color) !important;
+    }
+
+    .timeline-container {
+        border-left: 2px solid #e3e8ee;
+        padding-left: 20px;
+        margin-top: 10px;
+        margin-left: 10px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 24px;
+    }
+
+    .timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -25px;
+        top: 0;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: var(--white);
+        border: 2px solid var(--brand-color);
+    }
+
+    .timeline-date {
+        font-size: 11px;
+        color: var(--text-color-light);
+        text-transform: uppercase;
+        font-weight: 800;
+        margin-bottom: 4px;
+    }
+
+    .timeline-header {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+
+    .timeline-body {
+        font-size: 13px;
+        color: var(--text-color);
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        white-space: pre-wrap;
+        margin-top: 5px;
+    }
+
+    .type-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: white;
+        margin-right: 6px;
+    }
+
+    .icon-call {
+        background: #00bcd4;
+    }
+
+    .icon-email {
+        background: #ff9800;
+    }
+
+    .icon-meeting {
+        background: #9c27b0;
+    }
+
+    .icon-note {
+        background: #607d8b;
+    }
+
+    .icon-system {
+        background: #78909c;
+    }
+
+    .timeline-actions button {
+        background: transparent !important;
+        padding: 4px 8px !important;
+        margin: 0 !important;
+    }
+
+    .btn-edit-act {
+        color: #1e88e5 !important;
+    }
+
+    .btn-del-act {
+        color: #e53935 !important;
+    }
+
+    .task-input-grid {
+        display: grid;
+        grid-template-columns: 3fr 2fr 1fr;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .task-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        margin-bottom: 8px;
+        border: 1px solid #eee;
+        transition: all 0.2s;
+    }
+
+    .task-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .task-text-container {
+        flex-grow: 1;
+        margin-right: 15px;
+    }
+
+    .task-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text-color);
+        display: block;
+        line-height: 1.3;
+    }
+
+    .task-date {
+        font-size: 11px;
+        color: var(--text-color-light);
+    }
+
+    .task-actions-group {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+    }
+
+    .task-done {
+        opacity: 0.6;
+        background: #f9f9f9;
+    }
+
+    .task-done .task-title {
+        text-decoration: line-through;
+        color: #999;
+    }
+
+    .deal-summary-card {
+        background: #f0f9fa;
+        border: 1px solid #b2ebf2;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .deal-summary-val {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--brand-color);
+        display: block;
+    }
+
+    .deal-list-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .rev-box {
+        background: #f1f8e9;
+        border: 1px solid #c5e1a5;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+    }
+
+    .rev-result-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #aed581;
+    }
+
+    .rev-val {
+        font-size: 20px;
+        font-weight: 800;
+        color: #33691e;
+        display: block;
+    }
+
+    .rev-lbl {
+        font-size: 11px;
+        text-transform: uppercase;
+        color: #558b2f;
+        font-weight: 700;
+    }
+
+    .scout-result-card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: start;
+        gap: 20px;
+    }
+
+    .scout-img {
+        width: 80px;
+        height: 80px;
+        object-fit: contain;
+        background: white;
+        border-radius: 4px;
+        padding: 8px;
+        border: 1px solid #eee;
+    }
+
+    .contact-card {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .contact-info strong {
+        display: block;
+        color: var(--text-color);
+        font-size: 14px;
+    }
+
+    .contact-info small {
+        color: var(--text-color-light);
+        font-size: 12px;
+        display: block;
+    }
+
+    .contact-actions button {
+        padding: 6px 10px;
+        font-size: 12px;
+        margin-left: 4px;
+    }
+
+    .ai-box {
+        background: #e3f2fd;
+        border: 1px solid #bbdefb;
+        border-radius: 6px;
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+
+    .ai-label {
+        color: #1565c0;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+        display: block;
+    }
+
+    .ai-content {
+        font-size: 13px;
+        color: #0d47a1;
+        margin: 0;
+        white-space: pre-wrap;
+    }
+
+    .stat-card {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-val {
+        font-size: 28px;
+        font-weight: 800;
+        color: var(--brand-color);
+        margin: 10px 0;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 12px;
+        color: var(--text-color-light);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .chart-container {
+        position: relative;
+        height: 300px;
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .dash-opp-item {
+        padding: 10px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .dash-opp-item:hover {
+        background: #f1f8e9;
+    }
+
+    .dash-stage-header {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--text-color-light);
+        background: #f8f9fa;
+        padding: 5px 10px;
+        margin-top: 10px;
+        border-radius: 4px;
+    }
+
+    .analysis-section {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .analysis-header {
+        font-weight: 800;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+        color: var(--brand-color);
+        border-bottom: 2px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .check-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+
+    .check-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 6px 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        border: 1px solid #eee;
+    }
+
+    .check-item select {
+        width: auto !important;
+        padding: 2px 5px !important;
+        height: auto !important;
+        font-size: 12px !important;
+        margin: 0 !important;
+        background: white !important;
+        border-color: #ddd !important;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .page-info {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text-color-light);
+    }
+
+    .ccx-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 100000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(3px);
+    }
+
+    .ccx-modal-box {
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+        width: 450px;
+        max-width: 90%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .ccx-wide-modal {
+        width: 600px;
+    }
+
+    #ccx-app-root .partner-card,
+    #ccx-app-root .referral-card {
+        background: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 16px;
+        transition: all 0.2s;
+        position: relative;
+        cursor: pointer;
+    }
+
+    #ccx-app-root .partner-card:hover,
+    #ccx-app-root .referral-card:hover {
+        box-shadow: var(--shadow-soft);
+        border-color: var(--brand-color);
+        transform: translateY(-2px);
+    }
+
+    #ccx-app-root .badge {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 20px;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    #ccx-app-root .badge-status {
+        background-color: #e0f2f1;
+        color: #00695c;
+    }
+
+    #ccx-app-root .badge-new {
+        background-color: #e3f2fd;
+        color: #1565c0;
+    }
+
+    #ccx-app-root .badge-won {
+        background-color: #e8f5e9;
+        color: #2e7d32;
+    }
+
+    #ccx-app-root .badge-lost {
+        background-color: #ffebee;
+        color: #c62828;
+    }
+
+    #ccx-app-root .badge-ltc {
+        background-color: var(--ltc-bg);
+        color: var(--ltc-color);
+        margin-right: 5px;
+    }
+
+    #ccx-app-root .badge-amb {
+        background-color: var(--amb-bg);
+        color: var(--amb-color);
+        margin-right: 5px;
+    }
+
+    #ccx-app-root .badge-acute {
+        background-color: #e3f2fd;
+        color: #1565c0;
+        margin-right: 5px;
+    }
+
+    #ccx-app-root .partner-card.hipo-card {
+        border: 2px solid var(--gold);
+        background: #fffcf0;
+    }
+
+    #ccx-app-root .hipo-icon {
+        color: var(--gold);
+        margin-right: 5px;
+        font-size: 14px;
+    }
+
+    #ccx-app-root .partner-card.archived-card {
+        opacity: 0.7;
+        background: #f5f5f5;
+        border-color: #e0e0e0;
+    }
+
+    #ccx-app-root .partner-card.archived-card h4 {
+        color: #757575;
+    }
+
+    @media(max-width: 900px) {
+        .filter-bar {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media(max-width: 600px) {
+
+        .grid-2,
+        .grid-3,
+        .check-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ccx-tab-btn {
+            padding: 12px 8px;
+            font-size: 13px;
+        }
+
+        .header-grid {
+            grid-template-columns: 1fr;
+            text-align: center;
+            gap: 10px;
+        }
+
+        .header-grid>div:last-child {
+            text-align: center;
+        }
+
+        .scout-result-card {
+            flex-direction: column;
+        }
+    }
+</style>
+
+<div id="ccx-app-root">
+
+    <div id="settings-modal" class="ccx-modal hidden">
+        <div class="ccx-modal-box">
+            <h3 style="margin-top:0;">Configuration</h3>
+            <div
+                style="background: #e8f5e9; padding: 15px; border-radius: 6px; border: 1px solid #c8e6c9; margin-bottom: 15px;">
+                <p style="margin: 0; font-size: 14px; color: #2e7d32; font-weight: 800;">
+                    <i class="fas fa-check-circle"></i> System AI Active
+                </p>
+            </div>
+            <p style="font-size:13px; color: var(--text-color-light);">
+                The CCX Converge engine is currently utilizing persistent internal credentials. No manual API
+                configuration is required for internal team members.
+            </p>
+            <div
+                style="text-align: right; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <button onclick="toggleSettings()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="import-modal" class="ccx-modal hidden">
+        <div class="ccx-modal-box ccx-wide-modal">
+            <h3 style="margin-top:0;">Import Center</h3>
+            <div class="sub-tabs" style="margin-bottom:15px;">
+                <button class="sub-tab-btn active" onclick="switchImportTab('import-csv', this)">Spreadsheet
+                    (CSV)</button>
+                <button class="sub-tab-btn" onclick="switchImportTab('import-paste', this)">Magic Paste (PDF)</button>
+            </div>
+
+            <div id="import-csv">
+                <label>What are you importing?</label>
+                <select id="import-type" onchange="resetImportUI()" style="margin-bottom:15px;">
+                    <option value="partners">Partner Profiles (Zach Copy)</option>
+                    <option value="deals">Deals / Opportunities (Salesforce)</option>
+                </select>
+                <p style="font-size:13px; color:var(--text-color-light);">Upload your .csv file.</p>
+                <input type="file" id="csv-file-input" accept=".csv" style="margin-bottom:15px;"
+                    onchange="handleCSVUpload(this)">
+
+                <div id="csv-mapping-partners" class="hidden mapping-ui"
+                    style="background:#f9f9f9; padding:15px; border-radius:6px; margin-bottom:15px;">
+                    <h4 style="margin-top:0; font-size:13px;">Map Partner Columns</h4>
+                    <div class="grid-2">
+                        <div><label>Partner Name *</label><select id="map-name"></select></div>
+                        <div><label>Segment (LTC/AMB)</label><select id="map-segment"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Target Tier (Hi-Po)</label><select id="map-tier"></select></div>
+                        <div><label>Market</label><select id="map-market"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Organization Type</label><select id="map-orgtype"></select></div>
+                        <div><label>Relationship Type</label><select id="map-reltype"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Website</label><select id="map-website"></select></div>
+                        <div><label>Membership / Size</label><select id="map-size"></select></div>
+                    </div>
+                    <h4 style="margin-top:15px; font-size:13px;">Engagement (Green Zone)</h4>
+                    <div class="grid-2">
+                        <div><label>Co-Marketing</label><select id="map-comarketing"></select></div>
+                        <div><label>Event Marketing</label><select id="map-eventmarketing"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Content / Thought Lead</label><select id="map-content"></select></div>
+                        <div><label>Lobbying / Gov't</label><select id="map-lobbying"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Market Intelligence</label><select id="map-intel"></select></div>
+                        <div><label>Access to Membership</label><select id="map-access"></select></div>
+                    </div>
+                    <div><label>Digital Promo</label><select id="map-promo"></select></div>
+
+                    <h4 style="margin-top:15px; font-size:13px;">Program Mechanics (Blue Zone)</h4>
+                    <div class="grid-2">
+                        <div><label>Partner Program?</label><select id="map-prog-exist"></select></div>
+                        <div><label>Reseller Program?</label><select id="map-reseller"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Marketplace Exists?</label><select id="map-marketplace"></select></div>
+                        <div><label>Solution Alignment?</label><select id="map-align"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Board/Committee Seat</label><select id="map-board"></select></div>
+                        <div><label>Membership Required</label><select id="map-membership"></select></div>
+                    </div>
+                    <h4 style="margin-top:15px; font-size:13px;">Financials (Yellow Zone)</h4>
+                    <div class="grid-2">
+                        <div><label>Sponsorship USD</label><select id="map-spons-usd"></select></div>
+                        <div><label>Sponsorship CAD</label><select id="map-spons-cad"></select></div>
+                    </div>
+                    <div class="grid-2" style="margin-top:15px;">
+                        <div><label>Notes / Context</label><select id="map-notes"></select></div>
+                        <div><label>API Available?</label><select id="map-api"></select></div>
+                    </div>
+                </div>
+
+                <div id="csv-mapping-deals" class="hidden mapping-ui"
+                    style="background:#e3f2fd; padding:15px; border-radius:6px; margin-bottom:15px; border:1px solid #bbdefb;">
+                    <h4 style="margin-top:0; font-size:13px; color:#1565c0;">Map Salesforce Columns</h4>
+                    <div class="grid-2">
+                        <div><label>Deal / Opp Name *</label><select id="map-deal-name"></select></div>
+                        <div><label>Partner Name (Linker) *</label><select id="map-deal-partner"></select></div>
+                    </div>
+                    <div class="grid-2">
+                        <div><label>Amount / MRR ($)</label><select id="map-deal-mrr"></select></div>
+                        <div><label>Stage / Status</label><select id="map-deal-stage"></select></div>
+                    </div>
+                    <small style="color:#1565c0;">System will match "Partner Name" to existing partners
+                        automatically.</small>
+                </div>
+                <button onclick="executeCSVImport()" style="width:100%;">Run Import</button>
+            </div>
+
+            <div id="import-paste" class="hidden">
+                <p style="font-size:13px; color:var(--text-color-light);">Copy text from a PDF or Doc and paste it here.
+                    The AI will extract the partners.</p>
+                <textarea id="magic-paste-text" rows="6" placeholder="1. Telus Health - www.telus.com..."></textarea>
+                <button onclick="processMagicPaste()" style="width:100%;">AI Extract & Import</button>
+            </div>
+            <button class="outline" onclick="toggleImport()" style="width:100%; margin-top:10px;">Close</button>
+        </div>
+    </div>
+
+    <div id="referral-edit-modal" class="ccx-modal hidden">
+        <div class="ccx-modal-box ccx-wide-modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h3 style="margin:0;">Update Opportunity</h3>
+                <button class="icon-btn outline" onclick="closeRefModal()" style="border:none;">&times;</button>
+            </div>
+            <form id="edit-referral-form">
+                <input type="hidden" id="edit-ref-id">
+                <div class="grid-2">
+                    <div><label>Opportunity Name</label><input type="text" id="edit-ref-name" readonly
+                            style="background:#f9f9f9 !important;"></div>
+                    <div><label>Partner (Source)</label><input type="text" id="edit-ref-partner" readonly
+                            style="background:#e0e0e0 !important; cursor:not-allowed;"></div>
+                </div>
+                <div class="grid-2">
+                    <div><label>MRR ($)</label><input type="number" id="edit-ref-mrr" style="margin-bottom: 16px;">
+                    </div>
+                    <div>
+                        <label>Status</label>
+                        <select id="edit-ref-status" style="margin-bottom: 16px;">
+                            <option value="New Lead">New Lead</option>
+                            <option value="Qualified">Qualified</option>
+                            <option value="Engaged">Engaged</option>
+                            <option value="Closed Won">Closed Won</option>
+                            <option value="Closed Lost">Closed Lost</option>
+                        </select>
+                    </div>
+                </div>
+                <label>Notes</label><textarea id="edit-ref-notes" rows="3"></textarea>
+                <div
+                    style="display: flex; justify-content: space-between; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                    <button type="button" class="danger" onclick="deleteReferral()">Delete</button>
+                    <button type="submit">Update Opportunity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="activity-log-modal" class="ccx-modal hidden">
+        <div class="ccx-modal-box">
+            <h3 style="margin-top:0;">Log Activity</h3>
+            <form id="activity-form">
+                <input type="hidden" id="edit-act-index" value="-1">
+                <label>Activity Type</label>
+                <select id="act-type" style="margin-bottom: 16px;">
+                    <option value="Call">📞 Phone Call</option>
+                    <option value="Email">✉️ Email</option>
+                    <option value="Meeting">📅 Meeting</option>
+                    <option value="Note">📝 Note / Other</option>
+                </select>
+                <label>Details</label>
+                <textarea id="act-details" rows="4" placeholder="What happened?"></textarea>
+                <div style="text-align: right; margin-top: 20px;">
+                    <button type="button" class="outline" onclick="closeActivityModal()">Cancel</button>
+                    <button type="submit">Save Activity</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="contact-edit-modal" class="ccx-modal hidden">
+        <div class="ccx-modal-box">
+            <h3 style="margin-top:0;">Edit Contact</h3>
+            <input type="hidden" id="edit-contact-index">
+            <div class="grid-2">
+                <div><label>Name</label><input type="text" id="edit-contact-name" style="margin-bottom:10px;"></div>
+                <div><label>Role</label><input type="text" id="edit-contact-role" style="margin-bottom:10px;"></div>
+            </div>
+            <label>Contact Details</label>
+            <div id="contact-fields-container"></div>
+            <button type="button" class="outline small-text-btn" onclick="addContactField()">+ Add Field</button>
+            <div
+                style="text-align: right; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <button type="button" class="outline" onclick="closeContactModal()">Cancel</button>
+                <button type="button" onclick="saveContactChanges()">Save Contact</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="ccx-tabs" style="z-index: 10; position: relative;">
+        <button class="ccx-tab-btn active" onclick="switchTab('tab-analytics')">Dashboard</button>
+        <button class="ccx-tab-btn" onclick="switchTab('tab-partners')">Partners</button>
+        <button class="ccx-tab-btn" onclick="switchTab('tab-referrals')">Pipeline</button>
+        <button class="ccx-tab-btn" onclick="switchTab('tab-scout')">Scout</button>
+        <button class="ccx-tab-btn" onclick="switchTab('tab-assistant')"><i class="fas fa-robot"></i> Stan (AI
+            Assistant)</button>
+    </div>
+
+    <div class="ccx-content">
+        <div id="tab-analytics" class="tab-pane">
+            <div class="header-grid">
+                <div></div>
+                <div style="text-align: center;">
+                    <h2>Dashboard</h2><small>Overview & Next Steps</small>
+                </div>
+                <div></div>
+            </div>
+            <div class="grid-3">
+                <div class="stat-card">
+                    <div class="stat-label">Active Partners</div>
+                    <div id="stat-active-count" class="stat-val">0</div><small>Partnerships Live</small>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Pipeline (MRR)</div>
+                    <div id="stat-pipeline-val" class="stat-val">$0</div><small>From Referrals</small>
+                </div>
+                <div class="stat-card" style="border-color:var(--brand-color); background:#f0f9fa;">
+                    <div class="stat-label">Top Partner</div>
+                    <div id="stat-top-partner" class="stat-val" style="font-size:20px; line-height:1.4;">-</div><small
+                        id="stat-top-val">$0 Generated</small>
+                </div>
+            </div>
+            <div class="grid-2" style="margin-top: 30px;">
+                <div style="border:1px solid var(--border-color); border-radius:8px; padding:20px;">
+                    <h3 style="margin-bottom: 16px;">Pipeline by Stage</h3>
+                    <div id="dashboard-opp-list" style="max-height: 280px; overflow-y: auto;">
+                        <small style="color:#999;">Loading opportunities...</small>
+                    </div>
+                </div>
+                <div style="border:1px solid var(--border-color); border-radius:8px; padding:20px;">
+                    <h3 style="margin-bottom: 16px;">Pipeline Mix</h3>
+                    <div class="chart-container" style="height:250px;"><canvas id="pipelineChart"></canvas></div>
+                </div>
+            </div>
+            <div style="border:1px solid var(--border-color); border-radius:8px; padding:20px; margin-top: 20px;">
+                <h3 style="margin-bottom: 16px;">Your Tasks</h3>
+                <div id="global-task-list"><small style="color:#999;">No pending tasks.</small></div>
+            </div>
+        </div>
+
+        <div id="tab-partners" class="tab-pane hidden">
+            <div id="view-radar">
+                <div class="header-grid">
+                    <div></div>
+                    <div style="text-align: center;">
+                        <h2>Partner Radar</h2><small id="count-display">Syncing...</small>
+                    </div>
+                    <div style="text-align: right;">
+                        <button class="icon-btn outline" onclick="toggleSettings()"><i class="fas fa-cog"></i></button>
+                        <button class="icon-btn outline" onclick="toggleImport()"><i
+                                class="fas fa-file-import"></i></button>
+                        <button id="btn-new-partner" class="outline" onclick="togglePartnerForm()">+ Add</button>
+                    </div>
+                </div>
+
+                <div class="filter-bar">
+                    <input type="search" id="search-partners" placeholder="Search partners..."
+                        oninput="renderPartners()">
+                    <select id="filter-partners-status" onchange="renderPartners()">
+                        <option value="All">All Statuses</option>
+                        <option value="Active">Active Partner</option>
+                        <option value="Radar">On Radar</option>
+                        <option value="Archived">Archived</option>
+                    </select>
+                    <select id="sort-partners" onchange="renderPartners()">
+                        <option value="name">Name</option>
+                        <option value="tier">Priority</option>
+                    </select>
+                    <select id="items-per-page" onchange="updateItemsPerPage()">
+                        <option value="20">20 per page</option>
+                    </select>
+                </div>
+
+                <div id="partner-list">
+                    <article aria-busy="true">Loading Database...</article>
+                </div>
+            </div>
+
+            <div id="view-deal-room" class="hidden" style="position: relative; z-index: 50;">
+                <button class="secondary" onclick="closeDealRoom()" style="margin-bottom: 20px;">&larr; Back to
+                    List</button>
+
+                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <img id="dr-logo" src="" style="width:60px; height:60px; border-radius:4px; object-fit:contain;"
+                            class="hidden">
+                        <div>
+                            <h2 id="dr-name" style="margin: 0; color: var(--brand-color);">Partner Name</h2>
+                            <small id="dr-header-meta">Type</small>
+                        </div>
+                    </div>
+                    <span id="dr-badge" class="badge badge-status">Status</span>
+                </div>
+
+                <div class="sub-tabs" style="margin-top: 20px; position: relative; z-index: 60;">
+                    <button class="sub-tab-btn active"
+                        onclick="switchDealSubTab('dr-tab-profile', this)">Profile</button>
+                    <button class="sub-tab-btn" onclick="switchDealSubTab('dr-tab-analysis', this)">Analysis</button>
+                    <button class="sub-tab-btn" onclick="switchDealSubTab('dr-tab-comm', this)">Actions</button>
+                    <button class="sub-tab-btn" onclick="switchDealSubTab('dr-tab-deals', this)">Deals</button>
+                    <button class="sub-tab-btn" onclick="switchDealSubTab('dr-tab-team', this)">Team</button>
+                    <button class="sub-tab-btn" onclick="switchDealSubTab('dr-tab-ai', this)">AI Strategy</button>
+                </div>
+
+                <form id="deal-room-form">
+                    <input type="hidden" id="dr-id">
+
+                    <div id="dr-tab-profile">
+                        <div
+                            style="background: #fff8e1; padding: 15px; border-radius: 8px; border: 1px solid #ffe082; margin-bottom: 20px;">
+                            <h4 style="margin-top:0; color: #f57f17;"><i class="fas fa-database"></i> Integration
+                                Foundation</h4>
+                            <div class="grid-2">
+                                <div>
+                                    <label>Primary EMR System</label>
+                                    <select id="dr-emr-type" style="background: white !important;">
+                                        <option value="">-- Select EMR --</option>
+                                        <option value="PointClickCare">PointClickCare (PCC)</option>
+                                        <option value="MatrixCare">MatrixCare</option>
+                                        <option value="AlayaCare">AlayaCare</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label>Internal Contract Ref #</label>
+                                    <input type="text" id="dr-contract-id" placeholder="CNX-2026-XXX"
+                                        style="background: white !important;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid-2">
+                            <div><label>Segment</label><select id="dr-segment">
+                                    <option value="LTC">LTC</option>
+                                    <option value="AMB">AMB</option>
+                                </select></div>
+                            <div><label>Target Tier</label><select id="dr-tier">
+                                    <option value="General">General</option>
+                                    <option value="Hi-Po">Hi-Po</option>
+                                </select></div>
+                        </div>
+
+                        <div
+                            style="margin-top:20px; padding: 12px; background: #f0f7fa; border-radius: 8px; border: 1px solid #b2ebf2;">
+                            <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                                <input type="checkbox" id="dr-sync-ac" style="width: auto; margin: 0; cursor: pointer;">
+                                <label for="dr-sync-ac" style="margin: 0; font-weight: 800; color: #024659;">Enable
+                                    ActiveCampaign Nurture Sync</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="dr-tab-analysis" class="hidden">
+                        <h4>Analysis Data</h4>
+                    </div>
+                    <div id="dr-tab-comm" class="hidden">
+                        <h4>Actions & Timeline</h4>
+                    </div>
+                    <div id="dr-tab-deals" class="hidden">
+                        <h4>Associated Deals</h4>
+                    </div>
+                    <div id="dr-tab-team" class="hidden">
+                        <h4>Contact Team</h4>
+                    </div>
+                    <div id="dr-tab-ai" class="hidden">
+                        <h4>AI Strategy Notes</h4>
+                    </div>
+
+                    <div
+                        style="text-align: right; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                        <button type="submit" id="btn-save-dr">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="tab-referrals" class="tab-pane hidden">
+            <div class="header-grid">
+                <div></div>
+                <div style="text-align: center;">
+                    <h2>Pipeline View</h2><small id="ref-total-display">Calculating Pipeline...</small>
+                </div>
+                <div></div>
+            </div>
+            <div class="filter-bar">
+                <input type="search" id="search-referrals" placeholder="Search opportunity name..."
+                    oninput="renderReferrals()" style="margin-bottom:0;">
+                <select id="filter-referrals-status" onchange="renderReferrals()" style="margin-bottom:0;">
+                    <option value="All">All Statuses</option>
+                    <option value="New Lead">New Lead</option>
+                    <option value="Qualified">Qualified</option>
+                    <option value="Engaged">Engaged</option>
+                    <option value="Closed Won">Closed Won</option>
+                    <option value="Closed Lost">Closed Lost</option>
+                </select>
+            </div>
+            <div id="referral-list">
+                <article aria-busy="true" style="border:none; padding:0; color:var(--text-color-light);">Syncing
+                    Deals...</article>
+            </div>
+        </div>
+
+        <div id="tab-scout" class="tab-pane hidden">
+            <div class="header-grid">
+                <div></div>
+                <div style="text-align: center;">
+                    <h2>The Prospector</h2><small>AI-Powered Partner Discovery</small>
+                </div>
+                <div></div>
+            </div>
+            <div class="grid-2">
+                <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h3>1. The Hunter</h3>
+                    <label>Strategy</label>
+                    <select id="scout-strategy" style="margin-bottom: 10px;">
+                        <option value="direct">Direct Partner Programs</option>
+                        <option value="marketplace">App Marketplaces</option>
+                        <option value="ecosystem">Ecosystem Check</option>
+                    </select>
+                    <label>Industry / Keyword</label>
+                    <input type="text" id="scout-keyword" placeholder="e.g. Long Term Care EMR"
+                        style="margin-bottom: 16px;">
+                    <button class="outline" onclick="runScout()" style="width:100%">Find Partners</button>
+                </div>
+                <div style="padding: 20px; border: 1px solid var(--border-color); border-radius: 8px;">
+                    <h3>2. The Grabber (AI Analyzer)</h3>
+                    <p style="font-size: 13px; color: var(--text-color-light); margin-bottom: 16px;">Paste a URL for AI
+                        Analysis.</p>
+                    <label>Website URL</label>
+                    <input type="text" id="scout-url" placeholder="e.g. www.pointclickcare.com"
+                        style="margin-bottom: 16px;">
+                    <button class="contrast" onclick="fetchAndAnalyze()" style="width: 100%;">Analyze URL</button>
+                </div>
+            </div>
+            <div id="scout-result" class="scout-result-card hidden">
+                <img id="scout-res-img" class="scout-img" src="" alt="Logo"
+                    onerror="this.src='https://ui-avatars.com/api/?name=CCX&background=024659&color=fff'">
+                <div style="flex-grow: 1;">
+                    <h4 id="scout-res-title" style="margin: 0; color: var(--brand-color);">Title</h4>
+                    <p id="scout-res-desc"
+                        style="font-size: 13px; color: var(--text-color-light); margin: 4px 0 16px 0; font-style: italic;">
+                        Description</p>
+                    <div class="ai-box"><span class="ai-label"><i class="fas fa-robot"></i> Overview</span>
+                        <p id="ai-overview-scout" class="ai-content">AI will populate this...</p>
+                    </div>
+                    <div class="ai-box"><span class="ai-label"><i class="fas fa-check-circle"></i> Consideration</span>
+                        <p id="ai-consideration-scout" class="ai-content">AI will populate this...</p>
+                    </div>
+                    <div class="ai-box"><span class="ai-label"><i class="fas fa-star"></i> Cliniconex Value</span>
+                        <p id="ai-value-scout" class="ai-content">AI will populate this...</p>
+                    </div>
+                    <button onclick="addScoutToRadar()" style="width: 100%;">+ Add to Radar</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-assistant" class="tab-pane hidden">
+            <div class="header-grid">
+                <div></div>
+                <div style="text-align: center;">
+                    <h2>Stan</h2><small>Your personal partnership assistant and strategist</small>
+                </div>
+                <div></div>
+            </div>
+            <div class="chat-window" id="assistant-chat-window">
+                <div class="message-bubble msg-ai">
+                    Hello Rebecca! I'm ready to help you research new partners, draft outreach emails, or analyze data.
+                    What are we working on today?
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <textarea id="assistant-input" rows="2" placeholder="Ask Stan..."
+                    style="flex-grow:1; resize:none; font-size:14px; padding:10px; border-radius:8px;"></textarea>
+                <button onclick="sendChatMessage()" style="height:auto; font-size:14px; padding: 10px 20px;">Send <i
+                        class="fas fa-paper-plane"></i></button>
+            </div>
+            <div id="assistant-typing" class="typing-indicator">Stan is typing...</div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // --- 1. CORE DEPENDENCIES ---
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, getDocs, serverTimestamp, writeBatch }
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // --- 2. FIREBASE CONFIGURATION ---
+    const firebaseConfig = {
+        apiKey: "AIzaSyBI7CCAqI1fJVhrfNn8wJbieMgbNaZNFQE",
+        authDomain: "ccx-converge.firebaseapp.com",
+        projectId: "ccx-converge",
+        storageBucket: "ccx-converge.firebasestorage.app",
+        messagingSenderId: "170445087938",
+        appId: "1:170445087938:web:19473c7fd658c41472475b"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const partnersCol = collection(db, 'partners');
+    const referralsCol = collection(db, 'referrals');
+
+    // --- 3. GLOBAL STATE ---
+    let allPartners = [];
+    let allReferrals = [];
+    let partnersCache = {};
+    let chatHistory = [];
+    let fetchedData = {};
+
+    const safeStr = (val) => (val === null || val === undefined) ? "" : String(val);
+
+    // --- SPRINT 2 WATCHDOG UTILITY: BUSINESS DAY CALCULATOR ---
+    const isStaleLead = (lastUpdatedDate, businessDayLimit) => {
+        if (!lastUpdatedDate) return false;
+        const start = lastUpdatedDate.toDate ? lastUpdatedDate.toDate() : new Date(lastUpdatedDate);
+        const end = new Date();
+        let count = 0;
+        let current = new Date(start);
+        while (current < end) {
+            current.setDate(current.getDate() + 1);
+            const day = current.getDay();
+            if (day !== 0 && day !== 6) count++; // Skip Sat/Sun
+        }
+        return count >= businessDayLimit;
+    };
+
+    // --- 4. NAVIGATION ---
+    window.switchTab = (tabId) => {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.ccx-tab-btn').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById(tabId);
+        if (target) target.classList.remove('hidden');
+        document.querySelectorAll('.ccx-tab-btn').forEach(btn => {
+            if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(tabId)) btn.classList.add('active');
+        });
+    };
+
+    window.switchDealSubTab = (tabId, btn = null) => {
+        const tabs = ['dr-tab-profile', 'dr-tab-analysis', 'dr-tab-comm', 'dr-tab-deals', 'dr-tab-team', 'dr-tab-ai'];
+        tabs.forEach(t => {
+            const el = document.getElementById(t);
+            if (el) el.classList.add('hidden');
+        });
+        const target = document.getElementById(tabId);
+        if (target) target.classList.remove('hidden');
+        document.querySelectorAll('.sub-tabs .sub-tab-btn').forEach(b => b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+    };
+
+    // --- 5. RENDERERS ---
+    window.renderPartners = () => {
+        const listDiv = document.getElementById('partner-list');
+        if (!listDiv) return;
+        listDiv.innerHTML = "";
+        allPartners.forEach(p => {
+            let badges = '';
+            if (p.emrType) badges += `<span class="badge" style="background:#f3e5f5; color:#7b1fa2; margin-right:5px;">${p.emrType}</span>`;
+            if (p.syncActiveCampaign) badges += `<span class="badge" style="background:#e3f2fd; color:#1976d2;">Sync</span>`;
+
+            listDiv.innerHTML += `
+            <div class="partner-card" onclick="openDealRoom('${p.id}')">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h4 style="margin:0;color:var(--brand-color);font-size:16px;">${p.name}</h4>
+                    <span class="badge badge-status">${p.status || 'Radar'}</span>
+                </div>
+                <div style="margin-top:6px; font-size:12px;">${badges}</div>
+            </div>`;
+        });
+    };
+
+    /* ======================================================================
+     MODULE 3: PIPELINE - STABILITY & WATCHDOG RE-LINK (FINAL)
+======================================================================= */
+
+    // 1. THE RENDERER (Creates the cards with the Counter)
+    window.renderReferrals = () => {
+        const list = document.getElementById('referral-list');
+        if (!list) return;
+        list.innerHTML = "";
+        let totalVal = 0;
+
+        allReferrals.forEach(r => {
+            totalVal += Number(r.mrr || 0);
+            let statusDisplay = r.status || 'New Lead';
+
+            // --- WATCHDOG CALCULATIONS ---
+            const now = new Date();
+            const updatedDate = r.lastUpdated?.toDate ? r.lastUpdated.toDate() : new Date(r.lastUpdated || Date.now());
+            const diffTime = Math.abs(now - updatedDate);
+            const daysInStage = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            const isStale = (statusDisplay === 'New Lead') && isStaleLead(r.lastUpdated, 7);
+            const isStalled = (statusDisplay === 'Qualified' || statusDisplay === 'Engaged') && daysInStage >= 14;
+
+            let alertBadge = '';
+            let cardStyle = '';
+
+            if (isStale) {
+                alertBadge = `<span class="badge" style="background:#ffebee; color:#c62828; border:1px solid #ef9a9a; margin-left:10px;">STALE LEAD</span>`;
+                cardStyle = `border-left: 5px solid #ef5350; background: #fffefe;`;
+            } else if (isStalled) {
+                alertBadge = `<span class="badge" style="background:#fff3e0; color:#e65100; border:1px solid #ffe0b2; margin-left:10px;">STALLED >14d</span>`;
+                cardStyle = `border-left: 5px solid #ff9800;`;
+            }
+
+            list.innerHTML += `
+        <div class="referral-card" onclick="window.editOpportunity('${r.id}')" style="${cardStyle}; cursor:pointer;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center;">
+                    <h4 style="margin:0; font-size:16px; color:var(--brand-color);">${r.leadName}</h4>
+                    ${alertBadge}
+                </div>
+                <span class="badge" style="background:#e0e0e0; color:#444;">${statusDisplay}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; margin-top:8px; color:var(--text-color-light);">
+                <span><i class="fas fa-handshake"></i> ${r.partnerName}</span>
+                <div style="text-align:right;">
+                    <span style="font-weight:700; color:var(--text-color); margin-right:15px;">$${Number(r.mrr || 0).toLocaleString()} MRR</span>
+                    <span style="font-size:11px; font-weight:800; color:${daysInStage >= 7 ? '#c62828' : '#5a6e7a'};">
+                        <i class="fas fa-hourglass-half"></i> ${daysInStage} DAYS IN PIPELINE
+                    </span>
+                </div>
+            </div>
+        </div>`;
+        });
+
+        const countDisplay = document.getElementById('ref-total-display');
+        if (countDisplay) countDisplay.innerText = `$${totalVal.toLocaleString()} Pipeline`;
+    };
+
+    // 2. THE INTERACTION LOGIC (Opens the modal)
+    window.editOpportunity = (id) => {
+        const data = allReferrals.find(r => r.id === id);
+        if (!data) return;
+
+        const setVal = (id, val) => { const el = document.getElementById(id); if (el) el.value = safeStr(val); };
+
+        setVal('edit-ref-id', id);
+        setVal('edit-ref-name', data.leadName);
+        setVal('edit-ref-partner', data.partnerName);
+        setVal('edit-ref-mrr', data.mrr);
+        setVal('edit-ref-status', data.status || 'New Lead');
+        setVal('edit-ref-notes', data.notes);
+
+        document.getElementById('referral-edit-modal').classList.remove('hidden');
+    };
+
+    window.closeRefModal = () => {
+        document.getElementById('referral-edit-modal').classList.add('hidden');
+    };
+
+    // 3. THE SAVE & DELETE ACTIONS
+    document.getElementById('edit-referral-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('edit-ref-id').value;
+        const updates = {
+            mrr: parseFloat(document.getElementById('edit-ref-mrr').value) || 0,
+            status: document.getElementById('edit-ref-status').value,
+            notes: document.getElementById('edit-ref-notes').value,
+            lastUpdated: serverTimestamp()
+        };
+
+        try {
+            await updateDoc(doc(db, 'referrals', id), updates);
+            alert("Opportunity Updated & Watchdog Reset.");
+            window.closeRefModal();
+        } catch (err) { alert("Save Error: " + err.message); }
+    };
+
+    window.deleteReferral = async () => {
+        const id = document.getElementById('edit-ref-id').value;
+        if (confirm("Permanently delete this opportunity?")) {
+            try {
+                await deleteDoc(doc(db, 'referrals', id));
+                window.closeRefModal();
+            } catch (err) { alert("Delete Error: " + err.message); }
+        }
+    };
+    /* ======================================================================
+     MODULE 1: DASHBOARD - SPRINT 2 COMMAND CENTER LOGIC
+======================================================================= */
+
+    /* ======================================================================
+     MODULE 1: DASHBOARD - SPRINT 2 COMMAND CENTER LOGIC
+======================================================================= */
+
+    window.updateStats = () => {
+        try {
+            const activeCount = allPartners.filter(p => p.status === 'Active').length;
+            let totalPipeline = 0;
+            let atRiskCount = 0;
+            const now = new Date();
+
+            // 1. Calculate Pipeline Total & At-Risk Leads (7 Business Days)
+            allReferrals.forEach(r => {
+                totalPipeline += Number(r.mrr || 0);
+                const status = r.status || 'New Lead';
+                if ((status === 'New Lead' || status === 'New') && isStaleLead(r.lastUpdated, 7)) {
+                    atRiskCount++;
+                }
+            });
+
+            // 2. Count Inactive Partners (30 Days)
+            allPartners.forEach(p => {
+                if (p.status === 'Active' || p.status === 'Radar') {
+                    let lastActivityDate = null;
+
+                    if (p.activityLog && p.activityLog.length > 0) {
+                        const dates = p.activityLog.map(a => new Date(a.date));
+                        lastActivityDate = new Date(Math.max.apply(null, dates));
+                    } else if (p.createdAt) {
+                        lastActivityDate = p.createdAt.toDate ? p.createdAt.toDate() : new Date(p.createdAt);
+                    }
+
+                    if (lastActivityDate) {
+                        const diffDays = Math.ceil(Math.abs(now - lastActivityDate) / (1000 * 60 * 60 * 24));
+                        if (diffDays > 30) atRiskCount++;
+                    }
+                }
+            });
+
+            // 3. Update Dashboard UI Elements
+            const activeEl = document.getElementById('stat-active-count');
+            const pipeEl = document.getElementById('stat-pipeline-val');
+            const riskEl = document.getElementById('stat-at-risk-count');
+
+            if (activeEl) activeEl.innerText = activeCount;
+            if (pipeEl) pipeEl.innerText = `$${totalPipeline.toLocaleString()}`;
+            if (riskEl) {
+                riskEl.innerText = atRiskCount;
+                riskEl.style.color = atRiskCount > 0 ? '#c62828' : '#2e7d32';
+            }
+
+            // Refresh the "Pipeline by Stage" list on the dashboard
+            renderDashboardPipeline();
+            function renderPipelineMix() {
+    const mixDiv = document.getElementById('pipeline-mix-container');
+    if (!mixDiv) return;
+    
+    const stages = ['New Lead', 'Qualified', 'Engaged', 'Closed Won'];
+    const counts = stages.map(s => allReferrals.filter(r => (r.status || 'New Lead') === s).length);
+    const total = counts.reduce((a, b) => a + b, 0);
+    
+    mixDiv.innerHTML = "";
+    stages.forEach((stage, i) => {
+        const pct = total > 0 ? (counts[i] / total) * 100 : 0;
+        const color = stage === 'Closed Won' ? '#2e7d32' : (stage === 'Engaged' ? '#024659' : '#5a6e7a');
+        
+        mixDiv.innerHTML += `
+            <div style="margin-bottom: 12px;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                    <span style="font-weight:700;">${stage}</span>
+                    <span>${counts[i]} (${Math.round(pct)}%)</span>
+                </div>
+                <div style="background:#eee; border-radius:10px; height:8px; width:100%; overflow:hidden;">
+                    <div style="background:${color}; width:${pct}%; height:100%; transition: width 0.5s ease;"></div>
+                </div>
+            </div>`;
+    });
+}
+        } catch (e) {
+            console.error("Dashboard Stats Error:", e);
+        }
+    };
+
+    // Helper to render the small list on the dashboard
+    function renderDashboardPipeline() {
+        const dashList = document.getElementById('dashboard-opp-list');
+        if (!dashList) return;
+        dashList.innerHTML = "";
+
+        // Group and display current opportunities by stage
+        const stages = ['Engaged', 'Qualified', 'New Lead'];
+        stages.forEach(stage => {
+            const stageOpps = allReferrals.filter(r => (r.status || 'New Lead') === stage);
+            if (stageOpps.length > 0) {
+                dashList.innerHTML += `<div class="dash-stage-header">${stage}</div>`;
+                stageOpps.forEach(r => {
+                    dashList.innerHTML += `
+                    <div class="dash-opp-item" onclick="switchTab('tab-referrals')">
+                        <div><strong>${r.leadName}</strong><br><small>${r.partnerName}</small></div>
+                        <div style="font-weight:800;">$${Number(r.mrr || 0).toLocaleString()}</div>
+                    </div>`;
+                });
+            }
+        });
+    }
+    /* ======================================================================
+         END PIPELINE WATCHDOG UPDATE
+    ======================================================================= */
+    // --- 6. DEAL ROOM LOGIC ---
+    window.openDealRoom = (pid) => {
+        const data = partnersCache[pid];
+        if (!data) return;
+        document.getElementById('dr-id').value = pid;
+        document.getElementById('dr-name').innerText = safeStr(data.name);
+        document.getElementById('view-radar').classList.add('hidden');
+        document.getElementById('view-deal-room').classList.remove('hidden');
+        window.switchDealSubTab('dr-tab-profile');
+    };
+
+    window.closeDealRoom = () => {
+        document.getElementById('view-deal-room').classList.add('hidden');
+        document.getElementById('view-radar').classList.remove('hidden');
+    };
+
+    // --- 7. DATABASE SYNC ENGINE ---
+    onSnapshot(collection(db, 'partners'), (snapshot) => {
+        allPartners = []; partnersCache = {};
+        snapshot.forEach(doc => {
+            const data = doc.data(); data.id = doc.id;
+            allPartners.push(data); partnersCache[doc.id] = data;
+        });
+        window.renderPartners();
+    });
+
+    onSnapshot(query(referralsCol, orderBy("lastUpdated", "desc")), (snapshot) => {
+        allReferrals = [];
+        snapshot.forEach(doc => { allReferrals.push({ ...doc.data(), id: doc.id }); });
+        window.renderReferrals();
+    });
+
+    // --- 8. UI TOGGLES ---
+    window.togglePartnerForm = () => document.getElementById('partner-form-container').classList.toggle('hidden');
+    window.toggleSettings = () => document.getElementById('settings-modal').classList.toggle('hidden');
+    window.toggleImport = () => document.getElementById('import-modal').classList.toggle('hidden');
+
+    // --- THE DATABASE HEARTBEAT ---
+    onSnapshot(collection(db, 'partners'), (snapshot) => {
+        allPartners = []; partnersCache = {};
+        snapshot.forEach(doc => {
+            const data = doc.data(); data.id = doc.id;
+            allPartners.push(data); partnersCache[doc.id] = data;
+        });
+        window.renderPartners(); // Refresh Partner List
+        if (window.updateStats) window.updateStats(); // Refresh Dashboard Stats
+    });
+
+    onSnapshot(query(referralsCol, orderBy("lastUpdated", "desc")), (snapshot) => {
+        allReferrals = [];
+        snapshot.forEach(doc => { allReferrals.push({ ...doc.data(), id: doc.id }); });
+        window.renderReferrals(); // Refresh Pipeline List
+        if (window.updateStats) window.updateStats(); // Refresh Dashboard MRR
+    });
+</script>

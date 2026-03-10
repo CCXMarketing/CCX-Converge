@@ -1,0 +1,12 @@
+CONVERGE API KEYS - KEEP SECURE
+
+Firebase Config:
+apiKey: AIzaSyB3xB4TXjbf9UvxH-mWpKbTeLafXza1B3E
+authDomain: ccx-converge.firebaseapp.com
+projectId: ccx-converge
+storageBucket: ccx-converge.firebasestorage.app
+messagingSenderId: 170445087938
+appId: 1:170445087938:web:19473c7fd658c41472475b
+
+Gemini API Key:
+AIzaSyC-joy4bQv2TTJi8i_Idt5pvlw7Gh7ojDw

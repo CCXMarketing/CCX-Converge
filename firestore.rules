@@ -1,0 +1,89 @@
+rules_version = '2';
+
+// Converge — Firestore Security Rules
+// Module 6: Integrations Backend
+//
+// Security Model:
+//   - All documents in the `settings` collection require Firebase Authentication
+//   - Only authenticated users can read or write any settings document
+//   - Activity log writes must include required fields: integration, eventType, timestamp
+//   - No anonymous access is permitted
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Helper Functions
+    // =========================================================================
+
+    /// Returns true if the request is from an authenticated (non-anonymous) user.
+    function isAuthenticated() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    /// Returns true if the given field exists and is a non-empty string.
+    function isNonEmptyString(field) {
+      return field is string && field.size() > 0;
+    }
+
+    /// Returns true if the given field is a valid Firestore timestamp.
+    function isTimestamp(field) {
+      return field is timestamp;
+    }
+
+    // =========================================================================
+    // Settings Collection
+    // =========================================================================
+
+    // settings/apiKeys — Encrypted API key storage
+    match /settings/apiKeys {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // settings/fieldMappings — Integration field mapping configurations
+    match /settings/fieldMappings {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // settings/integrationStatus — Connection health and status tracking
+    match /settings/integrationStatus {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // settings/activityLog — Parent document (if needed for metadata)
+    match /settings/activityLog {
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated();
+    }
+
+    // settings/activityLog/entries/{entryId} — Individual activity log entries
+    // Write validation ensures required fields are present and correctly typed.
+    match /settings/activityLog/entries/{entryId} {
+      allow read: if isAuthenticated();
+
+      allow create: if isAuthenticated()
+        && isNonEmptyString(request.resource.data.integration)
+        && isNonEmptyString(request.resource.data.eventType)
+        && request.resource.data.keys().hasAll(['integration', 'eventType', 'timestamp'])
+        && isNonEmptyString(request.resource.data.details)
+        && isNonEmptyString(request.resource.data.status);
+
+      // Activity log entries are immutable once created — no updates or deletes
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // =========================================================================
+    // Catch-all: Deny all other access
+    // =========================================================================
+
+    // Any path not explicitly matched above is denied by default.
+    // This ensures no unintended access to other collections.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd:*)",
+      "Bash(dir:*)",
+      "Bash(ls:*)",
+      "Bash(npm install:*)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\gerald_cliniconex\\\\Documents\\\\Cliniconex\\\\Web Applications\\\\Converge\\\\src\\\\shared\\\\services\" -File)",
+      "Bash(Select-Object Name)"
+    ]
+  }
+}
