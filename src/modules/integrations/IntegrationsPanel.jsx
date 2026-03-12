@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { clearAllData } from '../../utils/clearDatabase';
 
 // ============================================
 // API KEY VAULT
@@ -800,6 +801,133 @@ const CurrencySettings = () => {
 };
 
 // ============================================
+// DANGER ZONE — Database Clear
+// ============================================
+const DangerZone = () => {
+  const [confirmText, setConfirmText] = useState('');
+  const [status, setStatus] = useState('idle'); // idle | running | done | error
+  const [results, setResults] = useState(null);
+
+  const handleClear = async () => {
+    if (confirmText !== 'DELETE') return;
+
+    setStatus('running');
+    try {
+      const res = await clearAllData();
+      setResults(res);
+      setStatus('done');
+    } catch (err) {
+      setResults({ _error: err.message });
+      setStatus('error');
+    }
+  };
+
+  const totalDeleted = results
+    ? Object.values(results).reduce((sum, r) => sum + (r.deleted || 0), 0)
+    : 0;
+
+  const errors = results
+    ? Object.entries(results).filter(([, r]) => r.error)
+    : [];
+
+  return (
+    <div className="space-y-4">
+      <div className="bg-white rounded-xl p-4 border border-red-200 shadow-sm">
+        <h3 className="text-red-700 font-semibold text-sm flex items-center gap-2">
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          Danger Zone
+        </h3>
+        <p className="text-xs text-gray-500 mt-1">
+          Irreversible actions. These cannot be undone.
+        </p>
+      </div>
+
+      <div className="bg-white rounded-xl border-2 border-red-200 shadow-sm overflow-hidden">
+        <div className="p-4">
+          <h4 className="text-sm font-medium text-[#404041]">Clear All Data</h4>
+          <p className="text-xs text-gray-500 mt-1">
+            Permanently delete all partner, prospect, interaction, deal, commission, MDF, payout, and checklist records.
+            Settings, tags, knowledge base, and webhooks will be preserved.
+          </p>
+
+          {status === 'idle' && (
+            <div className="mt-4 space-y-3">
+              <p className="text-xs text-red-600 font-medium">
+                This will permanently delete all partner, prospect, and transaction data. This cannot be undone. Type DELETE to confirm.
+              </p>
+              <div className="flex items-center gap-3">
+                <input
+                  type="text"
+                  value={confirmText}
+                  onChange={(e) => setConfirmText(e.target.value)}
+                  placeholder="Type DELETE to confirm"
+                  className="flex-1 max-w-xs bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm text-[#404041] focus:outline-none focus:border-red-400 placeholder-gray-400"
+                />
+                <button
+                  onClick={handleClear}
+                  disabled={confirmText !== 'DELETE'}
+                  className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Clear Database
+                </button>
+              </div>
+            </div>
+          )}
+
+          {status === 'running' && (
+            <div className="mt-4 flex items-center gap-2 text-sm text-gray-500">
+              <span className="w-4 h-4 border-2 border-gray-300 border-t-red-500 rounded-full animate-spin"></span>
+              Clearing data... This may take a moment.
+            </div>
+          )}
+
+          {status === 'done' && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium text-green-700">
+                Database cleared successfully. {totalDeleted} document(s) deleted.
+              </p>
+              <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1">
+                {Object.entries(results).map(([name, r]) => (
+                  <div key={name} className="flex items-center justify-between">
+                    <span className="font-mono">{name}</span>
+                    <span>{r.error ? <span className="text-red-500">{r.error}</span> : `${r.deleted} deleted`}</span>
+                  </div>
+                ))}
+              </div>
+              {errors.length > 0 && (
+                <p className="text-xs text-red-500">{errors.length} collection(s) had errors.</p>
+              )}
+              <button
+                onClick={() => { setStatus('idle'); setConfirmText(''); setResults(null); }}
+                className="text-xs text-gray-400 hover:text-[#02475A] transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          )}
+
+          {status === 'error' && (
+            <div className="mt-4 space-y-2">
+              <p className="text-sm font-medium text-red-600">
+                Failed to clear database: {results?._error || 'Unknown error'}
+              </p>
+              <button
+                onClick={() => { setStatus('idle'); setConfirmText(''); setResults(null); }}
+                className="text-xs text-gray-400 hover:text-[#02475A] transition-colors"
+              >
+                Try Again
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // MAIN EXPORT
 // ============================================
 const IntegrationsPanel = ({ activeTab }) => {
@@ -811,6 +939,7 @@ const IntegrationsPanel = ({ activeTab }) => {
       {activeTab === 'mapper' && <FieldMapper />}
       {activeTab === 'webhooks' && <WebhookManager />}
       {activeTab === 'currency' && <CurrencySettings />}
+      {activeTab === 'danger' && <DangerZone />}
     </div>
   );
 };
