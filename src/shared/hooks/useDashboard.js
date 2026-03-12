@@ -1,44 +1,89 @@
 import { useState, useEffect } from 'react';
+import { collection, getDocs, query, where, Timestamp } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 /**
- * useDashboard - Provides dashboard data
- * Returns mock data for now (Firebase auth not configured yet)
+ * useDashboard - Provides dashboard data from Firestore
  */
 export function useDashboard() {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [kpis, setKpis] = useState({ activePartners: 0, mrrPipeline: 0, partnersOnboarding: 0 });
+  const [alerts, setAlerts] = useState([]);
+  const [activities, setActivities] = useState([]);
+  const [distribution, setDistribution] = useState({ tiers: [] });
 
-  // Mock KPIs
-  const kpis = {
-    activePartners: 35,
-    mrrPipeline: 425000,
-    partnersOnboarding: 8
-  };
+  useEffect(() => {
+    async function fetchDashboardData() {
+      try {
+        setLoading(true);
 
-  // Mock alerts
-  const alerts = [
-    { id: 1, type: 'warning', title: 'Stalled Deal', message: 'Acme Corp deal - no activity for 45 days', partnerId: '1' },
-    { id: 2, type: 'danger', title: 'Contract Expiring', message: 'TechVentures contract expires in 30 days', partnerId: '2' },
-    { id: 3, type: 'warning', title: 'Stalled Deal', message: 'HealthTech Solutions - no response for 35 days', partnerId: '3' }
-  ];
+        // Fetch partners
+        const partnersSnap = await getDocs(collection(db, 'partners'));
+        const partners = partnersSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-  // Mock recent activities
-  const activities = [
-    { id: 1, partner: 'Acme Corporation', type: 'Call', date: '2024-02-19', notes: 'Quarterly business review' },
-    { id: 2, partner: 'TechVentures', type: 'Email', date: '2024-02-18', notes: 'Contract renewal discussion' },
-    { id: 3, partner: 'HealthTech Solutions', type: 'Meeting', date: '2024-02-17', notes: 'Product demo and training' },
-    { id: 4, partner: 'MedConnect', type: 'Call', date: '2024-02-16', notes: 'Support escalation resolved' },
-    { id: 5, partner: 'CareWell Systems', type: 'Email', date: '2024-02-15', notes: 'New lead referral received' }
-  ];
+        const active = partners.filter(p => p.status === 'Active').length;
+        const onboarding = partners.filter(p => p.status === 'Onboarding').length;
 
-  // Mock tier distribution
-  const distribution = {
-    tiers: [
-      { name: 'Gold', count: 5, revenue: 180000, color: 'bg-yellow-400' },
-      { name: 'Silver', count: 12, revenue: 168000, color: 'bg-gray-400' },
-      { name: 'Bronze', count: 18, revenue: 77000, color: 'bg-orange-400' }
-    ]
-  };
+        // Fetch deals for pipeline value
+        const dealsSnap = await getDocs(collection(db, 'deals'));
+        const deals = dealsSnap.docs.map(doc => doc.data());
+        const pipeline = deals
+          .filter(d => d.stage !== 'Closed Won' && d.stage !== 'Closed Lost')
+          .reduce((sum, d) => sum + (d.deal_value || 0), 0);
+
+        setKpis({ activePartners: active, mrrPipeline: pipeline, partnersOnboarding: onboarding });
+
+        // Build alerts from partner data
+        const partnerAlerts = [];
+        partners.forEach(p => {
+          if (p.health_score < 40) {
+            partnerAlerts.push({ id: `hs-${p.id}`, type: 'danger', title: 'Low Health Score', message: `${p.company_name} health score is ${p.health_score}`, partnerId: p.id });
+          }
+        });
+        setAlerts(partnerAlerts);
+
+        // Fetch recent interactions
+        const interactionsSnap = await getDocs(collection(db, 'interactions'));
+        const interactions = interactionsSnap.docs
+          .map(doc => ({ id: doc.id, ...doc.data() }))
+          .sort((a, b) => {
+            const dateA = a.date?.toDate?.() || new Date(0);
+            const dateB = b.date?.toDate?.() || new Date(0);
+            return dateB - dateA;
+          })
+          .slice(0, 5)
+          .map(i => ({
+            id: i.id,
+            partner: i.partner_name,
+            type: i.type,
+            date: i.date?.toDate?.()?.toISOString?.()?.split('T')[0] || '',
+            notes: i.notes
+          }));
+        setActivities(interactions);
+
+        // Build tier distribution
+        const tierMap = {};
+        partners.forEach(p => {
+          const tier = p.tier || 'Unassigned';
+          if (!tierMap[tier]) tierMap[tier] = { name: tier, count: 0, revenue: 0, color: 'bg-gray-400' };
+          tierMap[tier].count++;
+        });
+        if (tierMap['Gold']) tierMap['Gold'].color = 'bg-yellow-400';
+        if (tierMap['Silver']) tierMap['Silver'].color = 'bg-gray-400';
+        if (tierMap['Bronze']) tierMap['Bronze'].color = 'bg-orange-400';
+        setDistribution({ tiers: Object.values(tierMap) });
+
+      } catch (err) {
+        console.error('Dashboard fetch error:', err);
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchDashboardData();
+  }, []);
 
   return {
     kpis,

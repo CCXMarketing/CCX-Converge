@@ -231,8 +231,8 @@ export default function PartnerGrid({ selectedPartnerId, onSelectPartner }) {
 
             {!loading && displayed.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-gray-400">
-                  No partners found.
+                <td colSpan={5} className="px-4 py-12 text-center">
+                  <p className="text-gray-400">No partners yet. Add your first partner to get started.</p>
                 </td>
               </tr>
             )}

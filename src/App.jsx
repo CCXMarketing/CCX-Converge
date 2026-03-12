@@ -9,8 +9,7 @@ import ScoutLayout from './modules/scout/ScoutLayout';
 import StanLayout from './modules/stan/StanLayout';
 import ReportingLayout from './modules/reporting/ReportingLayout';
 import IntegrationsLayout from './modules/integrations/IntegrationsLayout';
-import SeedButton from './utils/SeedButton';
-import { AuthProvider } from './shared/contexts/AuthContext';  // ← THIS LINE IS CRITICAL
+import { AuthProvider } from './shared/contexts/AuthContext';
 
 
 // Placeholder component for modules not yet built
@@ -26,7 +25,6 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <SeedButton />
         <Routes>
           <Route element={<AppLayout />}>
             <Route index element={<DashboardLayout />} />
