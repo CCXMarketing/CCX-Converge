@@ -49,19 +49,28 @@ const DEFAULT_HEALTH_WEIGHTS = {
   data_completeness: 0.2,
 };
 
-/** Fields checked by calculateDataCompleteness */
+/** Fields checked by calculateDataCompleteness – matches fieldDefinitions.js */
 const COMPLETENESS_FIELDS = [
-  'company_name',
-  'contact_name',
-  'contact_email',
-  'contact_phone',
-  'partner_type',
-  'tier',
-  'status',
-  'region',
-  'address',
-  'website',
-  'notes',
+  // Core
+  'company_name', 'website_url', 'partner_address',
+  // Classification
+  'relationship_type', 'organization_type', 'tier', 'market',
+  'sub_specialty', 'membership_size', 'source',
+  // Contact
+  'contact_name', 'contact_email', 'contact_phone', 'contact_title', 'contact_linkedin',
+  // Capabilities (14 booleans)
+  'cap_co_marketing', 'cap_membership_required', 'cap_membership_available',
+  'cap_digital_promo', 'cap_event_marketing', 'cap_thought_leadership',
+  'cap_lobby_govt', 'cap_market_intelligence', 'cap_board_seat',
+  'cap_partner_program', 'cap_reseller_program', 'cap_marketplace',
+  'cap_solution_alignment', 'cap_api_available',
+  // Financial
+  'sponsorship_usd', 'sponsorship_cad',
+  // Lifecycle
+  'status', 'existing_partner', 'pipeline_stage',
+  'contract_start', 'contract_end', 'renewal_recommendation',
+  // Notes
+  'notes', 'previous_year_notes', 'reason_for_decline',
 ];
 
 // ---------------------------------------------------------------------------
@@ -132,17 +141,54 @@ export async function createPartner(partnerData = {}) {
     const dataCompleteness = _computeCompleteness(partnerData);
 
     const record = {
+      // Core
       company_name: company_name.trim(),
+      website_url: partnerData.website_url?.trim() || '',
+      partner_address: partnerData.partner_address?.trim() || '',
+      // Classification
+      relationship_type: partnerData.relationship_type?.trim() || '',
+      organization_type: partnerData.organization_type?.trim() || '',
+      tier: partnerData.tier?.trim() || '',
+      market: partnerData.market?.trim() || '',
+      sub_specialty: partnerData.sub_specialty?.trim() || '',
+      membership_size: partnerData.membership_size?.trim() || '',
+      source: partnerData.source?.trim() || '',
+      // Contact
       contact_name: partnerData.contact_name?.trim() || '',
       contact_email: partnerData.contact_email?.trim() || '',
       contact_phone: partnerData.contact_phone?.trim() || '',
-      partner_type: partnerData.partner_type?.trim() || '',
-      tier: partnerData.tier?.trim() || '',
-      status: partnerData.status?.trim() || 'prospect',
-      region: partnerData.region?.trim() || '',
-      address: partnerData.address?.trim() || '',
-      website: partnerData.website?.trim() || '',
+      contact_title: partnerData.contact_title?.trim() || '',
+      contact_linkedin: partnerData.contact_linkedin?.trim() || '',
+      // Capabilities (14 booleans)
+      cap_co_marketing: !!partnerData.cap_co_marketing,
+      cap_membership_required: !!partnerData.cap_membership_required,
+      cap_membership_available: !!partnerData.cap_membership_available,
+      cap_digital_promo: !!partnerData.cap_digital_promo,
+      cap_event_marketing: !!partnerData.cap_event_marketing,
+      cap_thought_leadership: !!partnerData.cap_thought_leadership,
+      cap_lobby_govt: !!partnerData.cap_lobby_govt,
+      cap_market_intelligence: !!partnerData.cap_market_intelligence,
+      cap_board_seat: !!partnerData.cap_board_seat,
+      cap_partner_program: !!partnerData.cap_partner_program,
+      cap_reseller_program: !!partnerData.cap_reseller_program,
+      cap_marketplace: !!partnerData.cap_marketplace,
+      cap_solution_alignment: !!partnerData.cap_solution_alignment,
+      cap_api_available: !!partnerData.cap_api_available,
+      // Financial
+      sponsorship_usd: partnerData.sponsorship_usd ?? null,
+      sponsorship_cad: partnerData.sponsorship_cad ?? null,
+      // Lifecycle
+      status: partnerData.status?.trim() || 'Prospect',
+      existing_partner: !!partnerData.existing_partner,
+      pipeline_stage: partnerData.pipeline_stage?.trim() || '',
+      contract_start: partnerData.contract_start || null,
+      contract_end: partnerData.contract_end || null,
+      renewal_recommendation: partnerData.renewal_recommendation?.trim() || '',
+      // Notes
       notes: partnerData.notes?.trim() || '',
+      previous_year_notes: partnerData.previous_year_notes?.trim() || '',
+      reason_for_decline: partnerData.reason_for_decline?.trim() || '',
+      // System
       tags: Array.isArray(partnerData.tags) ? partnerData.tags : [],
       health_score: 0,
       health_score_weights: { ...DEFAULT_HEALTH_WEIGHTS },
@@ -664,6 +710,8 @@ function _computeCompleteness(data = {}) {
   if (!data || typeof data !== 'object') return 0;
   const filled = COMPLETENESS_FIELDS.filter((f) => {
     const val = data[f];
+    // Treat false and 0 as filled (valid for booleans and numbers)
+    if (val === false || val === 0) return true;
     return val && (typeof val !== 'string' || val.trim().length > 0);
   });
   return Math.round((filled.length / COMPLETENESS_FIELDS.length) * 100);
