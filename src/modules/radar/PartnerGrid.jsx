@@ -50,9 +50,9 @@ export default function PartnerGrid({ selectedPartnerId, onSelectPartner }) {
     const q = search.toLowerCase();
     return partners.filter(
       (p) =>
-        (p.name && p.name.toLowerCase().includes(q)) ||
-        (p.company && p.company.toLowerCase().includes(q)) ||
-        (p.email && p.email.toLowerCase().includes(q)),
+        (p.company_name && p.company_name.toLowerCase().includes(q)) ||
+        (p.contact_name && p.contact_name.toLowerCase().includes(q)) ||
+        (p.market && p.market.toLowerCase().includes(q)),
     );
   }, [partners, search]);
 
@@ -232,7 +232,11 @@ export default function PartnerGrid({ selectedPartnerId, onSelectPartner }) {
             {!loading && displayed.length === 0 && (
               <tr>
                 <td colSpan={5} className="px-4 py-12 text-center">
-                  <p className="text-gray-400">No partners yet. Add your first partner to get started.</p>
+                  <p className="text-gray-400">
+                    {search.trim()
+                      ? 'No partners match your search.'
+                      : 'No partners yet. Add your first partner to get started.'}
+                  </p>
                 </td>
               </tr>
             )}
@@ -249,7 +253,7 @@ export default function PartnerGrid({ selectedPartnerId, onSelectPartner }) {
                   }`}
                 >
                   <td className="whitespace-nowrap px-4 py-3 font-medium text-gray-900">
-                    {partner.name}
+                    {partner.company_name}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3">
                     <span
